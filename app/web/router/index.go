@@ -10,7 +10,7 @@ func SetupRouter() {
 	engine.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello World!")
 	})
-	Api(engine)
+	RouterApi(engine)
 	err := engine.Run(":8088")
 	if err != nil {
 		panic(err)
