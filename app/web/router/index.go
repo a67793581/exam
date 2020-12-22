@@ -8,8 +8,9 @@ import (
 func SetupRouter() {
 	engine := gin.Default()
 	engine.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "hello World!")
+		c.String(http.StatusOK, "0")
 	})
+	engine.StaticFS("/public", http.Dir("/../../../public"))
 	RouterApi(engine)
 	err := engine.Run(":8088")
 	if err != nil {
