@@ -9,5 +9,6 @@ func api(engine *gin.Engine) {
 	api := engine.Group("/api")
 	{
 		api.GET("test", controller.Test)
+		api.GET("test_mysql", controller.TestMysql)
 	}
 }
