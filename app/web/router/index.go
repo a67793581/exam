@@ -11,7 +11,7 @@ func SetupRouter() {
 		c.String(http.StatusOK, "0")
 	})
 	engine.StaticFS("/public", http.Dir("/../../../public"))
-	RouterApi(engine)
+	api(engine)
 	err := engine.Run(":8088")
 	if err != nil {
 		panic(err)

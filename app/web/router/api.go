@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RouterApi(engine *gin.Engine) {
+func api(engine *gin.Engine) {
 	api := engine.Group("/api")
 	{
 		api.GET("test", controller.Test)
