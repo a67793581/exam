@@ -10,8 +10,8 @@ type Student struct {
 	Key       string
 	CreatedAt int
 	UpdatedAt int
-	//DeletedAt gorm.DeletedAt
-	DeletedAt *int `gorm:"column:deleted_at;null;autoUpdateTime"`
+	DeletedAt DeletedAt
+	//DeletedAt *int `gorm:"column:deleted_at;null;autoUpdateTime"`
 }
 
 func (o *Student) BeforeSave(db *gorm.DB) (err error) {

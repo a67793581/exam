@@ -41,4 +41,7 @@ func TestMysql(context *gin.Context) {
 	s := model.Student{Name: "carlo", Key: "test"}
 	db.Create(&s)
 	db.Delete(&s)
+	var result []model.Student
+	db.Model(&model.Student{}).Find(&result)
+	fmt.Println(result)
 }
