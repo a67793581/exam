@@ -16,7 +16,7 @@ import (
 
 func Test(context *gin.Context) {
 	name := context.DefaultQuery("name", "jack")
-	context.String(200, fmt.Sprintf("hello %s\n", name))
+	context.JSON(200, gin.H{"name": name})
 }
 
 func TestMysql(context *gin.Context) {
