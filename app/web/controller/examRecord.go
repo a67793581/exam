@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func StudentList(context *gin.Context) {
+func ExamRecordList(context *gin.Context) {
 	db := mysql.NewConnection()
-	var result []model.Student
-	db.Model(&model.Student{}).Find(&result)
+	var result []model.ExamRecord
+	db.Model(&model.ExamRecord{}).Find(&result)
 	context.JSON(200, result)
 }

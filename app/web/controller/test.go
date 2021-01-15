@@ -14,9 +14,8 @@ func Test(context *gin.Context) {
 
 func TestMysql(context *gin.Context) {
 	db := mysql.NewConnection()
-	s := model.Student{Name: "carlo", Key: "test"}
+	s := model.ExamRecord{Key: "test"}
 	db.Create(&s)
-	db.Delete(&s)
 	var result []model.Student
 	db.Model(&model.Student{}).Find(&result)
 	fmt.Println(result)
