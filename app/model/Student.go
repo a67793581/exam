@@ -5,13 +5,9 @@ import (
 )
 
 type Student struct {
-	ID        uint `gorm:"primaryKey"`
-	Name      string
-	Key       string
-	CreatedAt int
-	UpdatedAt int
-	DeletedAt DeletedAt
-	//DeletedAt *int `gorm:"column:deleted_at;null;autoUpdateTime"`
+	Base
+	Name string
+	Key  string
 }
 
 func (o *Student) BeforeSave(db *gorm.DB) (err error) {

@@ -7,12 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Test(context *gin.Context) {
-	name := context.DefaultQuery("name", "jack")
-	context.JSON(200, gin.H{"name": name})
-}
-
-func TestMysql(context *gin.Context) {
+func Student(context *gin.Context) {
 	db := mysql.NewConnection()
 	s := model.Student{Name: "carlo", Key: "test"}
 	db.Create(&s)
