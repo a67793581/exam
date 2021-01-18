@@ -3,12 +3,12 @@ package controller
 import (
 	"exam/app/model"
 	"exam/app/service/mysql"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
-func ExamRecordList(context *gin.Context) {
+func ExamRecordList(context echo.Context) error {
 	db := mysql.NewConnection()
 	var result []model.ExamRecord
 	db.Model(&model.ExamRecord{}).Find(&result)
-	context.JSON(200, result)
+	return context.JSON(200, result)
 }

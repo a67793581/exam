@@ -1,21 +1,17 @@
 package router
 
 import (
-	"exam/app/web/router/middleware"
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func SetupRouter() {
-	engine := gin.Default()
-	engine.Use(middleware.Cors())
-	engine.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "0")
-	})
-	engine.StaticFS("/public", http.Dir("/../../../public"))
-	api(engine)
-	err := engine.Run(":8088")
-	if err != nil {
-		panic(err)
-	}
+	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{}))
+	//web前端文件
+	e.Static("/", "../public")
+	//api接口
+	api(e)
+	//日志
+	e.Logger.Fatal(e.Start(":8088"))
 }

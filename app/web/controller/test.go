@@ -3,22 +3,19 @@ package controller
 import (
 	"exam/app/model"
 	"exam/app/service/mysql"
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
-func Test(context *gin.Context) {
-	name := context.DefaultQuery("name", "jack")
-	context.JSON(200, gin.H{"name": name})
+func Test(context echo.Context) error {
+	return context.String(http.StatusOK, context.QueryParam("name"))
 }
 
-func TestMysql(context *gin.Context) {
+func TestMysql(context echo.Context) error {
 	db := mysql.NewConnection()
 	s := model.ExamRecord{Key: "test"}
 	db.Create(&s)
 	var result []model.Student
 	db.Model(&model.Student{}).Find(&result)
-	fmt.Println(result)
-
-	context.JSON(200, result)
+	return context.JSON(http.StatusOK, result)
 }
