@@ -17,7 +17,9 @@ func SetupRouter() {
 	api(e)
 	//graphql
 	h, _ := graphql.NewHandler()
-	e.POST("/graphql", echo.WrapHandler(h))
+	e.POST("/graphql/default", echo.WrapHandler(h))
+	Student, _ := graphql.Student()
+	e.POST("/graphql/student", echo.WrapHandler(Student))
 	//日志
 	e.Logger.Fatal(e.Start(":8088"))
 }

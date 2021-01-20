@@ -9,7 +9,15 @@ var ExamRecord = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "ExamRecord",
 		Fields: graphql.Fields{
-			"id": &graphql.Field{Type: graphql.ID},
+			"id": &graphql.Field{
+				Type: graphql.ID,
+				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+					ExamRecord, ok := (p.Source).(model.ExamRecord)
+					if ok {
+						return ExamRecord.ID, nil
+					}
+					return 0, nil
+				}},
 			"created_at": &graphql.Field{
 				Type: graphql.Int,
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
