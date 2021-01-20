@@ -18,6 +18,7 @@ func api(e *echo.Echo) {
 		examRecord := api.Group("/exam_record")
 		{
 			examRecord.GET("/list", controller.ExamRecordList)
+			examRecord.GET("/details", controller.ExamRecordDetails)
 		}
 
 	}
