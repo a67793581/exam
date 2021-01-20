@@ -7,26 +7,25 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func NewExamRecords() *graphql.Field {
+func NewUsers() *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(object.ExamRecord),
+		Type: graphql.NewList(object.User),
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			var result []*model.ExamRecord
+			var result []*model.User
 			mysql.GetIns().Find(&result)
 			return result, nil
 		},
-		Description: "考试记录列表",
+		Description: "用户列表",
 	}
 }
-
-func NewExamRecord() *graphql.Field {
+func NewUser() *graphql.Field {
 	return &graphql.Field{
-		Type: object.ExamRecord,
+		Type: object.User,
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			var result model.ExamRecord
+			var result model.User
 			mysql.GetIns().First(&result)
 			return result, nil
 		},
-		Description: "考试记录",
+		Description: "用户",
 	}
 }
