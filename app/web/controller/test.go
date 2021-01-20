@@ -12,7 +12,7 @@ func Test(context echo.Context) error {
 }
 
 func TestMysql(context echo.Context) error {
-	db := mysql.NewConnection()
+	db := mysql.GetIns()
 	s := model.ExamRecord{Key: "test"}
 	db.Create(&s)
 	var result []model.Student

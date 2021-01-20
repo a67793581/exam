@@ -7,14 +7,14 @@ import (
 )
 
 func ExamRecordList(context echo.Context) error {
-	db := mysql.NewConnection()
+	db := mysql.GetIns()
 	var result []model.ExamRecord
 	db.Model(&model.ExamRecord{}).Find(&result)
 	return context.JSON(200, result)
 }
 
 func ExamRecordDetails(context echo.Context) error {
-	db := mysql.NewConnection()
+	db := mysql.GetIns()
 	var result model.ExamRecord
 	db.First(&result)
 	return context.JSON(200, result)

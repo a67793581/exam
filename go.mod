@@ -8,6 +8,8 @@ require (
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/gin-gonic/gin v1.6.3 // indirect
 	github.com/go-delve/delve v1.5.1 // indirect
+	github.com/graphql-go/graphql v0.7.9 // indirect
+	github.com/graphql-go/handler v0.2.3
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/lib/pq v1.9.0 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect

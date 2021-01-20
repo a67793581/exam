@@ -7,7 +7,7 @@ import (
 )
 
 func StudentList(context echo.Context) error {
-	db := mysql.NewConnection()
+	db := mysql.GetIns()
 	var result []model.Student
 	db.Model(&model.Student{}).Find(&result)
 	return context.JSON(200, result)

@@ -9,8 +9,19 @@ import (
 	"gorm.io/gorm/schema"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
+
+var ins *gorm.DB
+var once sync.Once
+
+func GetIns() *gorm.DB {
+	once.Do(func() {
+		ins = NewConnection()
+	})
+	return ins
+}
 
 func NewConnection() *gorm.DB {
 	newLogger := logger.New(
