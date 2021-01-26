@@ -16,8 +16,8 @@ func SetupRouter() {
 	//api接口
 	api(e)
 	//graphql
-	h, _ := graphql.NewHandler()
-	e.POST("/graphql/default", echo.WrapHandler(h))
+	h, _ := graphql.Teacher()
+	e.POST("/graphql/teacher", echo.WrapHandler(h))
 	Student, _ := graphql.Student()
 	e.POST("/graphql/student", echo.WrapHandler(Student))
 	//日志

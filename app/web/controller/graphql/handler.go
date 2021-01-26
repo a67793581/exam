@@ -6,17 +6,17 @@ import (
 	"github.com/graphql-go/handler"
 )
 
-func NewHandler() (*handler.Handler, error) {
+func Teacher() (*handler.Handler, error) {
 	schema, err := graphql.NewSchema(
 		graphql.SchemaConfig{
 			Query: graphql.NewObject(
 				graphql.ObjectConfig{
 					Name: "Query",
 					Fields: graphql.Fields{
-						"Users":       field.NewUsers(),
-						"User":        field.NewUser(),
-						"ExamRecords": field.NewExamRecords(),
-						"ExamRecord":  field.NewExamRecord(),
+						"examRecords": field.ExamRecordList(),
+						"examRecord":  field.ExamRecordShow(),
+						"students":    field.StudentList(),
+						"student":     field.StudentShow(),
 					},
 				},
 			),
@@ -39,8 +39,8 @@ func Student() (*handler.Handler, error) {
 				graphql.ObjectConfig{
 					Name: "Query",
 					Fields: graphql.Fields{
-						"ExamRecords": field.NewExamRecords(),
-						"ExamRecord":  field.NewExamRecord(),
+						"examRecords": field.ExamRecordList(),
+						"examRecord":  field.ExamRecordShow(),
 					},
 				},
 			),
