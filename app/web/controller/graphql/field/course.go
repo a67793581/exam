@@ -12,7 +12,8 @@ type Course struct {
 
 var CourseObject = *graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "Course",
+		Description: "课程",
+		Name:        "Course",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
 				Type: graphql.ID,
@@ -55,30 +56,49 @@ var CourseObject = *graphql.NewObject(
 			},
 			"name": &graphql.Field{Type: graphql.String},
 		},
-		Description: "课程",
 	},
 )
 
 func CourseList() *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(&CourseObject),
+		Description: "课程列表",
+		Type:        graphql.NewList(&CourseObject),
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result []model.Course
-			mysql.GetIns().Find(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.Find(&result)
 			return result, nil
 		},
-		Description: "课程列表",
 	}
 }
 
 func CourseShow() *graphql.Field {
 	return &graphql.Field{
-		Type: &CourseObject,
+		Description: "课程",
+		Type:        &CourseObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.Course
-			mysql.GetIns().First(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.First(&result)
 			return result, nil
 		},
-		Description: "课程",
 	}
 }

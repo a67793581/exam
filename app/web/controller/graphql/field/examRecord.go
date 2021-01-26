@@ -95,24 +95,44 @@ var ExamRecordObject = *graphql.NewObject(
 
 func ExamRecordList() *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(&ExamRecordObject),
+		Description: "考试记录列表",
+		Type:        graphql.NewList(&ExamRecordObject),
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result []model.ExamRecord
-			mysql.GetIns().Find(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.Find(&result)
 			return result, nil
 		},
-		Description: "考试记录列表",
 	}
 }
 
 func ExamRecordShow() *graphql.Field {
 	return &graphql.Field{
-		Type: &ExamRecordObject,
+		Description: "考试记录",
+		Type:        &ExamRecordObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.ExamRecord
-			mysql.GetIns().First(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.First(&result)
 			return result, nil
 		},
-		Description: "考试记录",
 	}
 }

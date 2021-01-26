@@ -62,24 +62,44 @@ var StudentObject = *graphql.NewObject(
 
 func StudentList() *graphql.Field {
 	return &graphql.Field{
-		Type: graphql.NewList(&StudentObject),
+		Description: "学生列表",
+		Type:        graphql.NewList(&StudentObject),
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result []model.Student
-			mysql.GetIns().Find(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.Find(&result)
 			return result, nil
 		},
-		Description: "学生列表",
 	}
 }
 
 func StudentShow() *graphql.Field {
 	return &graphql.Field{
-		Type: &StudentObject,
+		Description: "学生",
+		Type:        &StudentObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.Student
-			mysql.GetIns().First(&result)
+			id, ok := p.Args["id"].(int)
+			db := mysql.GetIns().Model(&result)
+			if ok {
+				db.Where("id = ?", id)
+			}
+			db.First(&result)
 			return result, nil
 		},
-		Description: "学生",
 	}
 }
