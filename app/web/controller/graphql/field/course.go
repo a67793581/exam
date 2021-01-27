@@ -3,6 +3,7 @@ package field
 import (
 	"exam/app/model"
 	"exam/app/service/mysql"
+	"fmt"
 	"github.com/graphql-go/graphql"
 )
 
@@ -91,6 +92,9 @@ func CourseShow() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			fmt.Println("上下文", p.Context)
+			fmt.Println("上下文", p.Info)
+			fmt.Println("上下文", p.Source)
 			var result model.Course
 			id, ok := p.Args["id"].(int)
 			db := mysql.GetIns().Model(&result)
