@@ -73,7 +73,7 @@ func CourseList() *graphql.Field {
 			id, ok := p.Args["id"].(int)
 			db := mysql.GetIns().Model(&result)
 			if ok {
-				db.Where("id = ?", id)
+				db.Where("`id` = ?", id)
 			}
 			db.Find(&result)
 			return result, nil
@@ -95,7 +95,7 @@ func CourseShow() *graphql.Field {
 			id, ok := p.Args["id"].(int)
 			db := mysql.GetIns().Model(&result)
 			if ok {
-				db.Where("id = ?", id)
+				db.Where("`id` = ?", id)
 			}
 			db.First(&result)
 			return result, nil

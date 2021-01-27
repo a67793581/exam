@@ -107,7 +107,7 @@ func ExamRecordList() *graphql.Field {
 			id, ok := p.Args["id"].(int)
 			db := mysql.GetIns().Model(&result)
 			if ok {
-				db.Where("id = ?", id)
+				db.Where("`id` = ?", id)
 			}
 			db.Find(&result)
 			return result, nil
@@ -123,13 +123,20 @@ func ExamRecordShow() *graphql.Field {
 			"id": &graphql.ArgumentConfig{
 				Type: graphql.Int,
 			},
+			"key": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.ExamRecord
-			id, ok := p.Args["id"].(int)
 			db := mysql.GetIns().Model(&result)
+			id, ok := p.Args["id"].(int)
 			if ok {
-				db.Where("id = ?", id)
+				db.Where("`id` = ?", id)
+			}
+			key, ok := p.Args["key"].(string)
+			if ok {
+				db.Where("`key` = ?", key)
 			}
 			db.First(&result)
 			return result, nil
