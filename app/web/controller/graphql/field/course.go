@@ -3,8 +3,8 @@ package field
 import (
 	"exam/app/model"
 	"exam/app/service/mysql"
-	"fmt"
 	"github.com/graphql-go/graphql"
+	"reflect"
 )
 
 type Course struct {
@@ -92,15 +92,22 @@ func CourseShow() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			fmt.Println("上下文", p.Context)
-			fmt.Println("上下文", p.Info)
-			fmt.Println("上下文", p.Source)
 			var result model.Course
-			id, ok := p.Args["id"].(int)
+			var where = make(map[string]interface{})
 			db := mysql.GetIns().Model(&result)
+			id, ok := p.Args["id"].(int)
 			if ok {
-				db.Where("`id` = ?", id)
+				where["id"] = id
 			}
+			t := reflect.TypeOf(p.Source)
+			v := reflect.ValueOf(p.Source)
+			if t.Kind() == reflect.Struct {
+				StructField, ok := t.FieldByName("CourseID")
+				if ok {
+					where["id"] = v.FieldByName(StructField.Name).Interface()
+				}
+			}
+			db.Where(where)
 			db.First(&result)
 			return result, nil
 		},
