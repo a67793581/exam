@@ -188,3 +188,14 @@ func ExamRecordShow() *graphql.Field {
 		},
 	}
 }
+
+func ExamRecordConnection() *graphql.Field {
+	return &graphql.Field{
+		Type: getConnection(ExamRecordList),
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.ExamRecord
+			//未完成
+			return result, nil
+		},
+	}
+}

@@ -13,10 +13,11 @@ func Teacher() (*handler.Handler, error) {
 				graphql.ObjectConfig{
 					Name: "Query",
 					Fields: graphql.Fields{
-						"examRecords": field.ExamRecordList(),
-						"examRecord":  field.ExamRecordShow(),
-						"students":    field.StudentList(),
-						"student":     field.StudentShow(),
+						"examRecords":          field.ExamRecordList(),
+						"examRecord":           field.ExamRecordShow(),
+						"students":             field.StudentList(),
+						"student":              field.StudentShow(),
+						"ExamRecordConnection": field.ExamRecordConnection(),
 					},
 				},
 			),
