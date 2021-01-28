@@ -8,7 +8,7 @@ import (
 )
 
 func Test(context echo.Context) error {
-	return context.String(http.StatusOK, context.QueryParam("name"))
+	return context.String(http.StatusOK, "你输入的name："+context.QueryParam("name"))
 }
 
 func TestMysql(context echo.Context) error {

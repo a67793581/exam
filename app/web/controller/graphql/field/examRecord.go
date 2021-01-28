@@ -101,16 +101,59 @@ func ExamRecordList() *graphql.Field {
 			"id": &graphql.ArgumentConfig{
 				Type: graphql.Int,
 			},
+			"key": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"first": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"offset": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"after": &graphql.ArgumentConfig{
+				Type: graphql.ID,
+			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			var result []model.ExamRecord
+
+			var examRecords []model.ExamRecord
+			db := mysql.GetIns().Model(&examRecords)
+			var where = make(map[string]interface{})
 			id, ok := p.Args["id"].(int)
-			db := mysql.GetIns().Model(&result)
 			if ok {
-				db.Where("`id` = ?", id)
+				where["id"] = id
 			}
-			db.Find(&result)
-			return result, nil
+			key, ok := p.Args["key"].(string)
+			if ok {
+				where["key"] = key
+			}
+			first, ok := p.Args["first"].(int)
+			if ok {
+				db.Limit(first)
+			}
+			offset, ok := p.Args["offset"].(int)
+			if ok {
+				db.Offset(offset)
+			}
+			after, ok := p.Args["after"].(int)
+			if ok {
+				db.Where("`id` > '?'", after)
+			}
+			db.Where(where)
+
+			db.Find(&examRecords)
+			//var count int64
+			//db.Count(&count)
+			//var result = make(map[string]interface{})
+			//result["edges"] = examRecords
+			//result["totalCount"] = count
+			//pageInfo := make(map[string]interface{})
+			//if len(examRecords) > 0 {
+			//	pageInfo["startCursor"] = examRecords[0]
+			//	pageInfo["endCursor"] = examRecords[len(examRecords)-1]
+			//}
+			//result["pageInfo"] = pageInfo
+			return examRecords, nil
 		},
 	}
 }
@@ -130,14 +173,16 @@ func ExamRecordShow() *graphql.Field {
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.ExamRecord
 			db := mysql.GetIns().Model(&result)
+			var where = make(map[string]interface{})
 			id, ok := p.Args["id"].(int)
 			if ok {
-				db.Where("`id` = ?", id)
+				where["id"] = id
 			}
 			key, ok := p.Args["key"].(string)
 			if ok {
-				db.Where("`key` = ?", key)
+				where["key"] = key
 			}
+			db.Where(where)
 			db.First(&result)
 			return result, nil
 		},
