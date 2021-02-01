@@ -191,10 +191,76 @@ func ExamRecordShow() *graphql.Field {
 
 func ExamRecordConnection() *graphql.Field {
 	return &graphql.Field{
-		Type: getConnection(ExamRecordList),
+		Description: "字段:考试记录列表信息",
+		Type:        getConnectionList(graphql.NewList(&ExamRecordObject), "ExamRecordObjectList", "对象：考试记录列表信息"),
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"key": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"first": &graphql.ArgumentConfig{
+				Type:         graphql.Int,
+				DefaultValue: 5,
+			},
+			"offset": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"after": &graphql.ArgumentConfig{
+				Type: graphql.ID,
+			},
+		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			var result model.ExamRecord
-			//未完成
+			var examRecords []model.ExamRecord
+			db := mysql.GetIns().Model(&examRecords)
+			var where = make(map[string]interface{})
+			id, ok := p.Args["id"].(int)
+			if ok {
+				where["id"] = id
+			}
+			key, ok := p.Args["key"].(string)
+			if ok {
+				where["key"] = key
+			}
+			first, ok := p.Args["first"].(int)
+			if ok {
+				db.Limit(first)
+			}
+			offset, ok := p.Args["offset"].(int)
+			if ok {
+				db.Offset(offset)
+			}
+			db.Where(where)
+			var totalCount int64
+			var afterCount int64
+			db.Count(&totalCount)
+			after, ok := p.Args["after"].(int)
+			if ok {
+				db.Where("`id` > '?'", after)
+				db.Count(&afterCount)
+			}
+			db.Find(&examRecords)
+			edges := make(map[string]interface{})
+			edges["node"] = examRecords
+			pageInfo := make(map[string]interface{})
+			if afterCount > 0 {
+				pageInfo["hasNextPage"] = afterCount > 0
+			} else {
+				pageInfo["hasNextPage"] = (float64(totalCount) / float64(first)) > 1
+			}
+			if len(examRecords) > 0 {
+				edges["cursor"] = examRecords[0].ID
+				pageInfo["endCursor"] = examRecords[len(examRecords)-1].ID
+			} else {
+				edges["cursor"] = 0
+				pageInfo["endCursor"] = 0
+			}
+
+			var result = make(map[string]interface{})
+			result["totalCount"] = totalCount
+			result["edges"] = edges
+			result["pageInfo"] = pageInfo
 			return result, nil
 		},
 	}
