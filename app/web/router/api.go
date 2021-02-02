@@ -1,19 +1,35 @@
 package router
 
 import (
+	"exam/app/service/token_jwt"
 	"exam/app/web/controller"
 	"exam/app/web/controller/graphql"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func api(e *echo.Echo) {
 	api := e.Group("/api")
 	{
 		//graphql
-		h, _ := graphql.Teacher()
-		api.Any("/graphql/teacher", echo.WrapHandler(h))
-		Student, _ := graphql.Student()
-		api.Any("/graphql/student", echo.WrapHandler(Student))
+		g := api.Group("/graphql")
+		{
+			teacher := g.Group("/teacher")
+			{
+				teacher.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+					Claims:     &token_jwt.Claims{},
+					SigningKey: []byte(token_jwt.Key),
+				}))
+				handler, _ := graphql.Teacher()
+				teacher.Any("", echo.WrapHandler(handler))
+			}
+
+			Student := g.Group("/student")
+			{
+				handler, _ := graphql.Student()
+				Student.Any("", echo.WrapHandler(handler))
+			}
+		}
 
 		api.GET("/test", controller.Test)
 		api.GET("/test_mysql", controller.TestMysql)
@@ -22,10 +38,10 @@ func api(e *echo.Echo) {
 			student.GET("/list", controller.StudentList)
 		}
 
-		examRecord := api.Group("/exam_record")
+		teacher := api.Group("/teacher")
 		{
-			examRecord.GET("/list", controller.ExamRecordList)
-			examRecord.GET("/details", controller.ExamRecordDetails)
+			// Login route
+			teacher.POST("/login", controller.Login)
 		}
 
 	}

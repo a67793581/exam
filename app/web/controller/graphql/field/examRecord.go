@@ -180,6 +180,7 @@ func ExamRecordShow() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+
 			var result model.ExamRecord
 			db := mysql.GetIns().Model(&result)
 			var where = make(map[string]interface{})
@@ -191,6 +192,12 @@ func ExamRecordShow() *graphql.Field {
 			if ok {
 				where["key"] = key
 			}
+			//user, _ := p.Context.Value("").(*jwt.Token)
+			//claims, _ := user.Claims.(*token_jwt.Claims)
+			//fmt.Println(user)
+			//if claims.Identity != "admin" {
+			//	where["student_id"] = claims.ID
+			//}
 			db.Where(where)
 			db.First(&result)
 			return result, nil
