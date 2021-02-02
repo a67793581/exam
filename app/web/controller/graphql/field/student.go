@@ -17,7 +17,7 @@ var StudentObject = *graphql.NewObject(
 		Name: "Student",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Type: graphql.ID,
+				Type: graphql.Int,
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 					Student, ok := (p.Source).(model.Student)
 					if !ok {

@@ -3,6 +3,7 @@ package field
 import (
 	"exam/app/model"
 	"exam/app/service/mysql"
+	"fmt"
 	"github.com/graphql-go/graphql"
 )
 
@@ -12,10 +13,11 @@ type ExamRecord struct {
 
 var ExamRecordObject = *graphql.NewObject(
 	graphql.ObjectConfig{
-		Name: "ExamRecord",
+		Name:        "ExamRecord",
+		Description: "考试记录",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Type: graphql.ID,
+				Type: graphql.Int,
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 					ExamRecord, ok := (p.Source).(model.ExamRecord)
 					if ok {
@@ -53,10 +55,17 @@ var ExamRecordObject = *graphql.NewObject(
 					return 0, nil
 				},
 			},
-			"code": &graphql.Field{Type: graphql.String},
-			"key":  &graphql.Field{Type: graphql.String},
+			"code": &graphql.Field{
+				Type:        graphql.String,
+				Description: "考场批次",
+			},
+			"key": &graphql.Field{
+				Type:        graphql.String,
+				Description: "考试唯一编码",
+			},
 			"exam_time": &graphql.Field{
-				Type: graphql.Int,
+				Type:        graphql.Int,
+				Description: "考试时间",
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 					ExamRecord, ok := (p.Source).(model.ExamRecord)
 					if ok {
@@ -65,9 +74,13 @@ var ExamRecordObject = *graphql.NewObject(
 					return 0, nil
 				},
 			},
-			"achievement": &graphql.Field{Type: graphql.Int},
+			"achievement": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "考试成绩",
+			},
 			"course_id": &graphql.Field{
-				Type: graphql.Int,
+				Type:        graphql.Int,
+				Description: "课程id",
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 					ExamRecord, ok := (p.Source).(model.ExamRecord)
 					if ok {
@@ -77,7 +90,8 @@ var ExamRecordObject = *graphql.NewObject(
 				},
 			},
 			"student_id": &graphql.Field{
-				Type: graphql.Int,
+				Type:        graphql.Int,
+				Description: "学生id",
 				Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 					ExamRecord, ok := (p.Source).(model.ExamRecord)
 					if ok {
@@ -89,7 +103,6 @@ var ExamRecordObject = *graphql.NewObject(
 			"student": StudentShow(),
 			"course":  CourseShow(),
 		},
-		Description: "考试记录",
 	},
 )
 
@@ -111,7 +124,7 @@ func ExamRecordList() *graphql.Field {
 				Type: graphql.Int,
 			},
 			"after": &graphql.ArgumentConfig{
-				Type: graphql.ID,
+				Type: graphql.Int,
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
@@ -208,7 +221,7 @@ func ExamRecordConnection() *graphql.Field {
 				Type: graphql.Int,
 			},
 			"after": &graphql.ArgumentConfig{
-				Type: graphql.ID,
+				Type: graphql.Int,
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
@@ -261,6 +274,168 @@ func ExamRecordConnection() *graphql.Field {
 			result["totalCount"] = totalCount
 			result["edges"] = edges
 			result["pageInfo"] = pageInfo
+			return result, nil
+		},
+	}
+}
+
+func ExamRecordDML() *graphql.Field {
+	return &graphql.Field{
+		Description: "字段:考试记录-增删改",
+		Type: graphql.NewObject(graphql.ObjectConfig{
+			Name:        "ExamRecordDML",
+			Description: "对象:考试记录-增删改",
+			Fields: graphql.Fields{
+				"create": ExamRecordCreate(),
+				"update": ExamRecordUpdate(),
+				"delete": ExamRecordDelete(),
+			},
+		}),
+
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			return p.Source, nil
+		},
+	}
+}
+
+func ExamRecordCreate() *graphql.Field {
+	return &graphql.Field{
+		Description: "创建考试记录",
+		Type:        &ExamRecordObject,
+		Args: graphql.FieldConfigArgument{
+			"key": &graphql.ArgumentConfig{
+				Description: "考试唯一编码",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"code": &graphql.ArgumentConfig{
+				Description: "考场批次",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"exam_time": &graphql.ArgumentConfig{
+				Description: "考场批次",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"achievement": &graphql.ArgumentConfig{
+				Description: "考试成绩",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"course_id": &graphql.ArgumentConfig{
+				Description: "课程id",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"student_id": &graphql.ArgumentConfig{
+				Description: "学生id",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.ExamRecord
+			db := mysql.GetIns().Model(&result)
+			StudentID, _ := p.Args["student_id"].(int32)
+			result.StudentID = StudentID
+			CourseID, _ := p.Args["course_id"].(int32)
+			result.CourseID = CourseID
+			Achievement, _ := p.Args["achievement"].(int32)
+			result.Achievement = Achievement
+			ExamTime, _ := p.Args["exam_time"].(int32)
+			result.ExamTime = ExamTime
+			Code, _ := p.Args["code"].(string)
+			result.Code = Code
+			Key, _ := p.Args["key"].(string)
+			result.Key = Key
+			db.Create(&result)
+			fmt.Println(result)
+			return result, nil
+		},
+	}
+}
+
+func ExamRecordUpdate() *graphql.Field {
+	return &graphql.Field{
+		Description: "更新考试记录",
+		Type:        &ExamRecordObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Description: "自增ID",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"key": &graphql.ArgumentConfig{
+				Description: "考试唯一编码",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"code": &graphql.ArgumentConfig{
+				Description: "考场批次",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"exam_time": &graphql.ArgumentConfig{
+				Description: "考场批次",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"achievement": &graphql.ArgumentConfig{
+				Description: "考试成绩",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"course_id": &graphql.ArgumentConfig{
+				Description: "课程id",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"student_id": &graphql.ArgumentConfig{
+				Description: "学生id",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.ExamRecord
+			db := mysql.GetIns().Model(&result)
+			ID, _ := p.Args["id"].(int)
+			result.ID = uint(ID)
+			Error := db.First(&result).Error
+			// 检查错误
+			if Error != nil {
+				panic(Error)
+			}
+
+			StudentID, _ := p.Args["student_id"].(int32)
+			result.StudentID = StudentID
+			CourseID, _ := p.Args["course_id"].(int32)
+			result.CourseID = CourseID
+			Achievement, _ := p.Args["achievement"].(int32)
+			result.Achievement = Achievement
+			ExamTime, _ := p.Args["exam_time"].(int32)
+			result.ExamTime = ExamTime
+			Code, _ := p.Args["code"].(string)
+			result.Code = Code
+			Key, _ := p.Args["key"].(string)
+			result.Key = Key
+			db.Save(&result)
+			fmt.Println(result)
+			return result, nil
+		},
+	}
+}
+
+func ExamRecordDelete() *graphql.Field {
+	return &graphql.Field{
+		Description: "删除考试记录",
+		Type:        &ExamRecordObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Description: "自增ID",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.ExamRecord
+			db := mysql.GetIns().Model(&result)
+			ID, _ := p.Args["id"].(int)
+			result.ID = uint(ID)
+			Error := db.First(&result).Error
+			// 检查错误
+			if Error != nil {
+				panic(Error)
+			}
+			db.Delete(&result)
+			fmt.Println(result)
 			return result, nil
 		},
 	}

@@ -15,9 +15,9 @@ func Teacher() (*handler.Handler, error) {
 					Fields: graphql.Fields{
 						"examRecords":          field.ExamRecordList(),
 						"examRecord":           field.ExamRecordShow(),
+						"ExamRecordConnection": field.ExamRecordConnection(),
 						"students":             field.StudentList(),
 						"student":              field.StudentShow(),
-						"ExamRecordConnection": field.ExamRecordConnection(),
 					},
 				},
 			),
@@ -42,6 +42,14 @@ func Student() (*handler.Handler, error) {
 					Fields: graphql.Fields{
 						"examRecords": field.ExamRecordList(),
 						"examRecord":  field.ExamRecordShow(),
+					},
+				},
+			),
+			Mutation: graphql.NewObject(
+				graphql.ObjectConfig{
+					Name: "Mutation",
+					Fields: graphql.Fields{
+						"ExamRecordDML": field.ExamRecordDML(),
 					},
 				},
 			),
