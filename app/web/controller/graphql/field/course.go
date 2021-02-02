@@ -7,10 +7,6 @@ import (
 	"reflect"
 )
 
-type Course struct {
-	Object *graphql.Object
-}
-
 var CourseObject = *graphql.NewObject(
 	graphql.ObjectConfig{
 		Description: "课程",

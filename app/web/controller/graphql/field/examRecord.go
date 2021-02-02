@@ -7,10 +7,6 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-type ExamRecord struct {
-	Object *graphql.Object
-}
-
 var ExamRecordObject = *graphql.NewObject(
 	graphql.ObjectConfig{
 		Name:        "ExamRecord",

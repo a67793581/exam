@@ -8,10 +8,6 @@ import (
 	"reflect"
 )
 
-type Student struct {
-	Object *graphql.Object
-}
-
 var StudentObject = *graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Student",
