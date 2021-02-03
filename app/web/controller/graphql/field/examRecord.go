@@ -151,17 +151,6 @@ func ExamRecordList() *graphql.Field {
 			db.Where(where)
 
 			db.Find(&examRecords)
-			//var count int64
-			//db.Count(&count)
-			//var result = make(map[string]interface{})
-			//result["edges"] = examRecords
-			//result["totalCount"] = count
-			//pageInfo := make(map[string]interface{})
-			//if len(examRecords) > 0 {
-			//	pageInfo["startCursor"] = examRecords[0]
-			//	pageInfo["endCursor"] = examRecords[len(examRecords)-1]
-			//}
-			//result["pageInfo"] = pageInfo
 			return examRecords, nil
 		},
 	}
@@ -255,26 +244,34 @@ func ExamRecordConnection() *graphql.Field {
 			if ok {
 				db.Where("`id` > '?'", after)
 				db.Count(&afterCount)
+				afterCount = afterCount - int64(first)
+			} else {
+				afterCount = totalCount - int64(first)
 			}
 			db.Find(&examRecords)
 			edges := make(map[string]interface{})
 			edges["node"] = examRecords
 			pageInfo := make(map[string]interface{})
-			if afterCount > 0 {
-				pageInfo["hasNextPage"] = afterCount > 0
-			} else {
-				pageInfo["hasNextPage"] = (float64(totalCount) / float64(first)) > 1
-			}
+			pageInfo["first"] = first
+			pageInfo["totalCount"] = totalCount
+			pageInfo["afterCount"] = afterCount
 			if len(examRecords) > 0 {
-				edges["cursor"] = examRecords[0].ID
+				if afterCount > 0 {
+					pageInfo["hasNextPage"] = afterCount > 0
+				} else {
+					pageInfo["hasNextPage"] = (float64(totalCount) / float64(first)) > 1
+				}
 				pageInfo["endCursor"] = examRecords[len(examRecords)-1].ID
+				pageInfo["startCursor"] = examRecords[0].ID
+				edges["cursor"] = examRecords[0].ID
 			} else {
-				edges["cursor"] = 0
+				pageInfo["hasNextPage"] = false
+				pageInfo["startCursor"] = 0
 				pageInfo["endCursor"] = 0
+				edges["cursor"] = 0
 			}
 
 			var result = make(map[string]interface{})
-			result["totalCount"] = totalCount
 			result["edges"] = edges
 			result["pageInfo"] = pageInfo
 			return result, nil

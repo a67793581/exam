@@ -1,11 +1,9 @@
 package router
 
 import (
-	"exam/app/service/token_jwt"
 	"exam/app/web/controller"
 	"exam/app/web/controller/graphql"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func api(e *echo.Echo) {
@@ -16,10 +14,10 @@ func api(e *echo.Echo) {
 		{
 			teacher := g.Group("/teacher")
 			{
-				teacher.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-					Claims:     &token_jwt.Claims{},
-					SigningKey: []byte(token_jwt.Key),
-				}))
+				//teacher.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+				//	Claims:     &token_jwt.Claims{},
+				//	SigningKey: []byte(token_jwt.Key),
+				//}))
 				handler, _ := graphql.Teacher()
 				teacher.Any("", echo.WrapHandler(handler))
 			}
