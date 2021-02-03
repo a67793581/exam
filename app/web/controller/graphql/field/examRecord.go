@@ -146,7 +146,7 @@ func ExamRecordList() *graphql.Field {
 			}
 			after, ok := p.Args["after"].(int)
 			if ok {
-				db.Where("`id` > '?'", after)
+				db.Where("`id` > ?", after)
 			}
 			db.Where(where)
 
@@ -215,10 +215,14 @@ func ExamRecordConnection() *graphql.Field {
 			"after": &graphql.ArgumentConfig{
 				Type: graphql.Int,
 			},
+			"before": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var examRecords []model.ExamRecord
-			db := mysql.GetIns().Model(&examRecords)
+			db := mysql.GetIns()
+			mDb := db.Model(&examRecords)
 			var where = make(map[string]interface{})
 			id, ok := p.Args["id"].(int)
 			if ok {
@@ -228,27 +232,44 @@ func ExamRecordConnection() *graphql.Field {
 			if ok {
 				where["key"] = key
 			}
+			var totalCount int64
+			var afterCount int64
+			mDb.Where(where)
+			mDb.Count(&totalCount)
+			after, ok := p.Args["after"].(int)
+			if ok {
+				mDb.Where("`id` > ?", after)
+			}
+			is_desc := false
+			before, ok := p.Args["before"].(int)
+			if ok {
+				mDb.Where("`id` < ?", before)
+				mDb.Order("`id` desc")
+				is_desc = true
+			}
+
 			first, ok := p.Args["first"].(int)
 			if ok {
-				db.Limit(first)
+				mDb.Limit(first)
 			}
 			offset, ok := p.Args["offset"].(int)
 			if ok {
-				db.Offset(offset)
+				mDb.Offset(offset)
 			}
-			db.Where(where)
-			var totalCount int64
-			var afterCount int64
-			db.Count(&totalCount)
-			after, ok := p.Args["after"].(int)
-			if ok {
-				db.Where("`id` > '?'", after)
-				db.Count(&afterCount)
-				afterCount = afterCount - int64(first)
-			} else {
-				afterCount = totalCount - int64(first)
+			mDb.Find(&examRecords)
+			if is_desc {
+				length := len(examRecords)
+				for i := 0; i < length/2; i++ {
+					temp := examRecords[length-1-i]
+					examRecords[length-1-i] = examRecords[i]
+					examRecords[i] = temp
+				}
 			}
-			db.Find(&examRecords)
+
+			if len(examRecords) > 0 {
+				db.Model(&examRecords).Where("`id` > ?", examRecords[len(examRecords)-1].ID).Count(&afterCount)
+			}
+
 			edges := make(map[string]interface{})
 			edges["node"] = examRecords
 			pageInfo := make(map[string]interface{})
