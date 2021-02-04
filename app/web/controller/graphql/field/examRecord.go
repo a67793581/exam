@@ -352,14 +352,14 @@ func ExamRecordCreate() *graphql.Field {
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
 			var result model.ExamRecord
 			db := mysql.GetIns().Model(&result)
-			StudentID, _ := p.Args["student_id"].(int32)
-			result.StudentID = StudentID
-			CourseID, _ := p.Args["course_id"].(int32)
-			result.CourseID = CourseID
-			Achievement, _ := p.Args["achievement"].(int32)
-			result.Achievement = Achievement
-			ExamTime, _ := p.Args["exam_time"].(int32)
-			result.ExamTime = ExamTime
+			StudentID, _ := p.Args["student_id"].(int)
+			result.StudentID = int32(StudentID)
+			CourseID, _ := p.Args["course_id"].(int)
+			result.CourseID = int32(CourseID)
+			Achievement, _ := p.Args["achievement"].(int)
+			result.Achievement = int32(Achievement)
+			ExamTime, _ := p.Args["exam_time"].(int)
+			result.ExamTime = int32(ExamTime)
 			Code, _ := p.Args["code"].(string)
 			result.Code = Code
 			Key, _ := p.Args["key"].(string)
