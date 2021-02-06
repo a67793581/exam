@@ -29,7 +29,7 @@ func api(e *echo.Echo) {
 			}
 		}
 
-		api.GET("/test", controller.Test)
+		api.Any("/test", controller.Test)
 		api.GET("/test_mysql", controller.TestMysql)
 		student := api.Group("/student")
 		{

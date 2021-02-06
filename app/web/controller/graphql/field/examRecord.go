@@ -188,8 +188,8 @@ func ExamRecordShow() *graphql.Field {
 			//	where["student_id"] = claims.ID
 			//}
 			db.Where(where)
-			db.First(&result)
-			return result, nil
+			Error := db.First(&result).Error
+			return result, Error
 		},
 	}
 }

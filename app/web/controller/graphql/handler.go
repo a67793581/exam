@@ -48,8 +48,7 @@ func Student() (*handler.Handler, error) {
 				graphql.ObjectConfig{
 					Name: "Query",
 					Fields: graphql.Fields{
-						"examRecords": field.ExamRecordList(),
-						"examRecord":  field.ExamRecordShow(),
+						"examRecord": field.ExamRecordShow(),
 					},
 				},
 			),
