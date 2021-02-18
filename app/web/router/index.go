@@ -15,5 +15,6 @@ func SetupRouter() {
 	//api接口
 	api(e)
 	//日志
+	e.Debug = true
 	e.Logger.Fatal(e.Start(":8088"))
 }

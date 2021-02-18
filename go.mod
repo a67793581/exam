@@ -3,12 +3,14 @@ module exam
 go 1.15
 
 require (
+	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/beego/bee/v2 v2.0.2 // indirect
 	github.com/beego/beego/v2 v2.0.1 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/gin-gonic/gin v1.6.3 // indirect
 	github.com/go-delve/delve v1.5.1 // indirect
-	github.com/graphql-go/graphql v0.7.9 // indirect
+	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/lib/pq v1.9.0 // indirect
