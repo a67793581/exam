@@ -32,12 +32,6 @@ func Test(context echo.Context) error {
 	decoder := mahonia.NewDecoder("gbk")
 	contents := decoder.ConvertString(Buf.String())
 
-	r := csv.NewReader(strings.NewReader(contents))
-	records, err := r.ReadAll()
-	if err != nil {
-		return err
-	}
-
 	////文件大小检测
 	if FileHeader.Size > 100000 {
 		return context.String(http.StatusBadRequest, "文件太大，当前大小："+strconv.FormatInt(FileHeader.Size, 10))
@@ -55,12 +49,18 @@ func Test(context echo.Context) error {
 	default:
 		return context.String(http.StatusBadRequest, "文件类型不合法："+detectedFileType)
 	}
-
+	//读取文件内容到数组
+	r := csv.NewReader(strings.NewReader(contents))
+	records, err := r.ReadAll()
+	if err != nil {
+		return err
+	}
 	var res = make(map[string]interface{})
 	res["FileHeader"] = FileHeader
 	res["contents"] = contents
 	res["detectedFileType"] = detectedFileType
 	res["records"] = records
+	//执行业务逻辑
 	//for k, v := range records {
 	//	for k2, v2 := range v {
 	//
