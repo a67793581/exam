@@ -40,6 +40,7 @@ func api(e *echo.Echo) {
 		{
 			// Login route
 			teacher.POST("/login", controller.Login)
+			teacher.POST("/import", controller.Import)
 		}
 
 	}
