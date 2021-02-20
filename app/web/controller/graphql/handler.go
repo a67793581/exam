@@ -18,6 +18,7 @@ func Teacher() (*handler.Handler, error) {
 						"ExamRecordConnection": field.ExamRecordConnection(),
 						"students":             field.StudentList(),
 						"student":              field.StudentShow(),
+						"StudentConnection":    field.StudentConnection(),
 					},
 				},
 			),
@@ -26,6 +27,7 @@ func Teacher() (*handler.Handler, error) {
 					Name: "Mutation",
 					Fields: graphql.Fields{
 						"ExamRecordDML": field.ExamRecordDML(),
+						"StudentDML":    field.StudentDML(),
 					},
 				},
 			),

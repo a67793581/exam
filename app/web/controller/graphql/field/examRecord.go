@@ -220,9 +220,9 @@ func ExamRecordConnection() *graphql.Field {
 			},
 		},
 		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
-			var examRecords []model.ExamRecord
+			var list []model.ExamRecord
 			db := mysql.GetIns()
-			mDb := db.Model(&examRecords)
+			mDb := db.Model(&list)
 			var where = make(map[string]interface{})
 			id, ok := p.Args["id"].(int)
 			if ok {
@@ -240,12 +240,12 @@ func ExamRecordConnection() *graphql.Field {
 			if ok {
 				mDb.Where("`id` > ?", after)
 			}
-			is_desc := false
+			isDesc := false
 			before, ok := p.Args["before"].(int)
 			if ok {
 				mDb.Where("`id` < ?", before)
 				mDb.Order("`id` desc")
-				is_desc = true
+				isDesc = true
 			}
 
 			first, ok := p.Args["first"].(int)
@@ -256,44 +256,40 @@ func ExamRecordConnection() *graphql.Field {
 			if ok {
 				mDb.Offset(offset)
 			}
-			mDb.Find(&examRecords)
-			if is_desc {
-				length := len(examRecords)
+			mDb.Find(&list)
+			if isDesc {
+				length := len(list)
 				for i := 0; i < length/2; i++ {
-					temp := examRecords[length-1-i]
-					examRecords[length-1-i] = examRecords[i]
-					examRecords[i] = temp
+					temp := list[length-1-i]
+					list[length-1-i] = list[i]
+					list[i] = temp
 				}
 			}
 
-			if len(examRecords) > 0 {
-				db.Model(&examRecords).Where("`id` > ?", examRecords[len(examRecords)-1].ID).Count(&afterCount)
+			if len(list) > 0 {
+				db.Model(&list).Where("`id` > ?", list[len(list)-1].ID).Count(&afterCount)
 			}
 
-			edges := make(map[string]interface{})
-			edges["node"] = examRecords
 			pageInfo := make(map[string]interface{})
 			pageInfo["first"] = first
 			pageInfo["totalCount"] = totalCount
 			pageInfo["afterCount"] = afterCount
-			if len(examRecords) > 0 {
+			if len(list) > 0 {
 				if afterCount > 0 {
 					pageInfo["hasNextPage"] = afterCount > 0
 				} else {
 					pageInfo["hasNextPage"] = (float64(totalCount) / float64(first)) > 1
 				}
-				pageInfo["endCursor"] = examRecords[len(examRecords)-1].ID
-				pageInfo["startCursor"] = examRecords[0].ID
-				edges["cursor"] = examRecords[0].ID
+				pageInfo["endCursor"] = list[len(list)-1].ID
+				pageInfo["startCursor"] = list[0].ID
 			} else {
 				pageInfo["hasNextPage"] = false
 				pageInfo["startCursor"] = 0
 				pageInfo["endCursor"] = 0
-				edges["cursor"] = 0
 			}
 
 			var result = make(map[string]interface{})
-			result["edges"] = edges
+			result["list"] = list
 			result["pageInfo"] = pageInfo
 			return result, nil
 		},

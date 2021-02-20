@@ -112,3 +112,220 @@ func StudentShow() *graphql.Field {
 		},
 	}
 }
+
+func StudentConnection() *graphql.Field {
+	return &graphql.Field{
+		Description: "字段:学生列表信息",
+		Type:        getConnectionList(graphql.NewList(&StudentObject), "StudentObjectList", "对象：学生列表信息"),
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"key": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"first": &graphql.ArgumentConfig{
+				Type:         graphql.Int,
+				DefaultValue: 5,
+			},
+			"offset": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"after": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+			"before": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var list []model.Student
+			db := mysql.GetIns()
+			mDb := db.Model(&list)
+			var where = make(map[string]interface{})
+			id, ok := p.Args["id"].(int)
+			if ok {
+				where["id"] = id
+			}
+			key, ok := p.Args["key"].(string)
+			if ok {
+				where["key"] = key
+			}
+			var totalCount int64
+			var afterCount int64
+			mDb.Where(where)
+			mDb.Count(&totalCount)
+			after, ok := p.Args["after"].(int)
+			if ok {
+				mDb.Where("`id` > ?", after)
+			}
+			isDesc := false
+			before, ok := p.Args["before"].(int)
+			if ok {
+				mDb.Where("`id` < ?", before)
+				mDb.Order("`id` desc")
+				isDesc = true
+			}
+
+			first, ok := p.Args["first"].(int)
+			if ok {
+				mDb.Limit(first)
+			}
+			offset, ok := p.Args["offset"].(int)
+			if ok {
+				mDb.Offset(offset)
+			}
+			mDb.Find(&list)
+			if isDesc {
+				length := len(list)
+				for i := 0; i < length/2; i++ {
+					temp := list[length-1-i]
+					list[length-1-i] = list[i]
+					list[i] = temp
+				}
+			}
+
+			if len(list) > 0 {
+				db.Model(&list).Where("`id` > ?", list[len(list)-1].ID).Count(&afterCount)
+			}
+
+			pageInfo := make(map[string]interface{})
+			pageInfo["first"] = first
+			pageInfo["totalCount"] = totalCount
+			pageInfo["afterCount"] = afterCount
+			if len(list) > 0 {
+				if afterCount > 0 {
+					pageInfo["hasNextPage"] = afterCount > 0
+				} else {
+					pageInfo["hasNextPage"] = (float64(totalCount) / float64(first)) > 1
+				}
+				pageInfo["endCursor"] = list[len(list)-1].ID
+				pageInfo["startCursor"] = list[0].ID
+			} else {
+				pageInfo["hasNextPage"] = false
+				pageInfo["startCursor"] = 0
+				pageInfo["endCursor"] = 0
+			}
+
+			var result = make(map[string]interface{})
+			result["list"] = list
+			result["pageInfo"] = pageInfo
+			return result, nil
+		},
+	}
+}
+
+func StudentDML() *graphql.Field {
+	return &graphql.Field{
+		Description: "字段:学生-增删改",
+		Type: graphql.NewObject(graphql.ObjectConfig{
+			Name:        "StudentDML",
+			Description: "对象:学生-增删改",
+			Fields: graphql.Fields{
+				"create": StudentCreate(),
+				"update": StudentUpdate(),
+				"delete": StudentDelete(),
+			},
+		}),
+
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			return p.Source, nil
+		},
+	}
+}
+
+func StudentCreate() *graphql.Field {
+	return &graphql.Field{
+		Description: "创建学生",
+		Type:        &StudentObject,
+		Args: graphql.FieldConfigArgument{
+			"key": &graphql.ArgumentConfig{
+				Description: "学号",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"name": &graphql.ArgumentConfig{
+				Description: "姓名",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.Student
+			db := mysql.GetIns().Model(&result)
+			Name, _ := p.Args["name"].(string)
+			result.Name = Name
+			Key, _ := p.Args["key"].(string)
+			result.Key = Key
+			db.Create(&result)
+			fmt.Println(result)
+			return result, nil
+		},
+	}
+}
+
+func StudentUpdate() *graphql.Field {
+	return &graphql.Field{
+		Description: "更新学生",
+		Type:        &StudentObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Description: "自增ID",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+			"key": &graphql.ArgumentConfig{
+				Description: "学号",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+			"name": &graphql.ArgumentConfig{
+				Description: "姓名",
+				Type:        graphql.NewNonNull(graphql.String),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.Student
+			db := mysql.GetIns().Model(&result)
+			ID, _ := p.Args["id"].(int)
+			result.ID = uint(ID)
+			Error := db.First(&result).Error
+			// 检查错误
+			if Error != nil {
+				panic(Error)
+			}
+
+			Name, _ := p.Args["name"].(string)
+			result.Name = Name
+			Key, _ := p.Args["key"].(string)
+			result.Key = Key
+			db.Save(&result)
+			fmt.Println(result)
+			fmt.Println(p.Args)
+			return result, nil
+		},
+	}
+}
+
+func StudentDelete() *graphql.Field {
+	return &graphql.Field{
+		Description: "删除学生",
+		Type:        &StudentObject,
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Description: "自增ID",
+				Type:        graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: func(p graphql.ResolveParams) (i interface{}, e error) {
+			var result model.Student
+			db := mysql.GetIns().Model(&result)
+			ID, _ := p.Args["id"].(int)
+			result.ID = uint(ID)
+			Error := db.First(&result).Error
+			// 检查错误
+			if Error != nil {
+				panic(Error)
+			}
+			db.Delete(&result)
+			fmt.Println(result)
+			return result, nil
+		},
+	}
+}
