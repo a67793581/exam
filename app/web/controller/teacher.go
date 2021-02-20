@@ -3,6 +3,8 @@ package controller
 import (
 	"bytes"
 	"encoding/csv"
+	"exam/app/model"
+	"exam/app/service/mysql"
 	"exam/app/service/token_jwt"
 	"github.com/axgle/mahonia"
 	"github.com/dgrijalva/jwt-go"
@@ -58,8 +60,8 @@ func Import(context echo.Context) error {
 
 	_, _ = io.Copy(&Buf, formFile)
 	//用gbk进行解码。
-	decoder := mahonia.NewDecoder("gbk")
-	contents := decoder.ConvertString(Buf.String())
+	decoder := mahonia.NewDecoder("utf-8")
+	contents := decoder.ConvertString(strings.Replace(Buf.String(), "\uFEFF", "", 1))
 
 	////文件大小检测
 	if FileHeader.Size > 100000 {
@@ -92,17 +94,134 @@ func Import(context echo.Context) error {
 	if err != nil {
 		return err
 	}
-	var res = make(map[string]interface{})
-	res["FileHeader"] = FileHeader
-	res["contents"] = contents
-	res["detectedFileType"] = detectedFileType
-	res["records"] = records
-	//执行业务逻辑
-	//for k, v := range records {
-	//	for k2, v2 := range v {
-	//
-	//	}
-	//}
 
+	//执行业务逻辑
+	mapStudent := make(map[string]model.Student)
+	var whereStudent []interface{}
+	var batchStudent []model.Student
+
+	mapCourse := make(map[string]model.Course)
+	var whereCourse []interface{}
+	var batchCourse []model.Course
+
+	for k, v := range records {
+		if k == 0 {
+			continue
+		}
+		for k2, v2 := range v {
+			if v2 == "" {
+				return context.JSON(http.StatusInternalServerError,
+					map[string]interface{}{
+						"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2) + "格内容禁止为空",
+					},
+				)
+			}
+		}
+
+		//'考试编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
+
+		if _, ok := mapStudent[v[6]]; !ok {
+			batchStudent = append(batchStudent, model.Student{
+				Name: v[5],
+				Key:  v[6],
+			})
+			whereStudent = append(whereStudent, v[6])
+			mapStudent[v[6]] = model.Student{}
+		}
+
+		if _, ok := mapCourse[v[4]]; !ok {
+			batchCourse = append(batchCourse, model.Course{
+				Name: v[4],
+			})
+			whereCourse = append(whereCourse, v[4])
+			mapCourse[v[4]] = model.Course{}
+		}
+
+	}
+
+	db := mysql.GetIns()
+
+	var Students []model.Student
+	db.Where("`key` IN ?", whereStudent).Find(&Students)
+	for _, v := range Students {
+		for k2, v2 := range batchStudent {
+			if v.Key == v2.Key {
+				batchStudent = append(batchStudent[:k2], batchStudent[(k2+1):]...)
+			}
+		}
+	}
+	db.Create(&batchStudent)
+	batchStudent = append(batchStudent, Students...)
+	for _, v := range batchStudent {
+		if _, ok := mapStudent[v.Key]; ok {
+			mapStudent[v.Key] = v
+		}
+	}
+
+	var Courses []model.Course
+	db.Where("`name` IN ?", whereCourse).Find(&Courses)
+	for _, v := range Courses {
+		for k2, v2 := range batchCourse {
+			if v.Name == v2.Name {
+				batchCourse = append(batchCourse[:k2], batchCourse[(k2+1):]...)
+			}
+		}
+	}
+	db.Create(&batchCourse)
+	batchCourse = append(batchCourse, Courses...)
+	for _, v := range batchCourse {
+		if _, ok := mapCourse[v.Name]; ok {
+			mapCourse[v.Name] = v
+		}
+	}
+
+	mapExamRecord := make(map[string]model.ExamRecord)
+	var whereExamRecord []interface{}
+	var batchExamRecord []model.ExamRecord
+	for k, v := range records {
+		if k == 0 {
+			continue
+		}
+		//'考试编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
+		Achievement, err := strconv.Atoi(v[2])
+		if err != nil {
+			return err
+		}
+		ExamTime, err := strconv.Atoi(v[1])
+		if err != nil {
+			return err
+		}
+
+		if _, ok := mapExamRecord[v[0]]; !ok {
+			batchExamRecord = append(batchExamRecord, model.ExamRecord{
+				Key:         v[0],
+				ExamTime:    int32(ExamTime),
+				Achievement: int32(Achievement),
+				Code:        v[3],
+				CourseID:    int32(mapCourse[v[4]].ID),
+				StudentID:   int32(mapStudent[v[6]].ID),
+			})
+			whereExamRecord = append(whereExamRecord, v[0])
+			mapExamRecord[v[0]] = model.ExamRecord{}
+		}
+
+	}
+
+	var ExamRecords []model.ExamRecord
+	db.Where("`key` IN ?", whereExamRecord).Find(&ExamRecords)
+	for _, v := range ExamRecords {
+		for k2, v2 := range batchExamRecord {
+			if v.Key == v2.Key {
+				batchExamRecord = append(batchExamRecord[:k2], batchExamRecord[(k2+1):]...)
+			}
+		}
+	}
+	db.Create(&batchExamRecord)
+	batchExamRecord = append(batchExamRecord, ExamRecords...)
+	var res = make(map[string]interface{})
+	res["records"] = records
+	res["mapStudent"] = mapStudent
+	res["mapCourse"] = mapCourse
+	res["batchExamRecord"] = batchExamRecord
 	return context.JSON(http.StatusOK, res)
 }
