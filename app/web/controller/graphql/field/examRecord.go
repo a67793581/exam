@@ -443,19 +443,45 @@ func ExamRecordUpdate() *graphql.Field {
 
 			StudentID, _ := p.Args["student_id"].(int)
 			result.StudentID = int32(StudentID)
+			var student model.Student
+			if !student.CheckID(StudentID) {
+				panic("不存在这个id的学生")
+			}
+
 			CourseID, _ := p.Args["course_id"].(int)
 			result.CourseID = int32(CourseID)
-			Achievement, _ := p.Args["achievement"].(int)
+			var course model.Course
+			if !course.CheckID(CourseID) {
+				panic("不存在这个id的课程")
+			}
+
+			Achievement, ok := p.Args["achievement"].(int)
 			result.Achievement = int32(Achievement)
-			ExamTime, _ := p.Args["exam_time"].(int)
+			if !ok || Achievement < 0 {
+				panic("成绩异常")
+			}
+
+			ExamTime, ok := p.Args["exam_time"].(int)
 			result.ExamTime = int32(ExamTime)
+
+			if !ok || ExamTime == 0 {
+				panic("考试时间异常")
+			}
+
 			Code, _ := p.Args["code"].(string)
 			result.Code = Code
+			if Code == "" {
+				panic("考试批次 不允许为空")
+			}
+
 			Key, _ := p.Args["key"].(string)
 			result.Key = Key
+
+			if Key == "" {
+				panic("考试编号 不允许为空")
+			}
+
 			db.Save(&result)
-			fmt.Println(result)
-			fmt.Println(p.Args)
 			return result, nil
 		},
 	}
