@@ -17,11 +17,15 @@ import (
 	"time"
 )
 
-func Login(c echo.Context) error {
-	key := c.FormValue("key")
+func Login(context echo.Context) error {
+	key := context.FormValue("key")
 
 	if key != "carlo" {
-		return echo.ErrUnauthorized
+		return context.JSON(http.StatusInternalServerError,
+			map[string]interface{}{
+				"message": "密码错误",
+			},
+		)
 	}
 	// Create token with claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, token_jwt.Claims{
@@ -38,7 +42,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, echo.Map{"token": t})
+	return context.JSON(http.StatusOK, echo.Map{"token": t})
 }
 
 func Import(context echo.Context) error {

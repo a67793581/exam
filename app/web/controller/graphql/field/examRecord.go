@@ -57,7 +57,7 @@ var ExamRecordObject = *graphql.NewObject(
 			},
 			"key": &graphql.Field{
 				Type:        graphql.String,
-				Description: "考试唯一编码",
+				Description: "考试唯一编号",
 			},
 			"exam_time": &graphql.Field{
 				Type:        graphql.Int,
@@ -321,7 +321,7 @@ func ExamRecordCreate() *graphql.Field {
 		Type:        &ExamRecordObject,
 		Args: graphql.FieldConfigArgument{
 			"key": &graphql.ArgumentConfig{
-				Description: "考试唯一编码",
+				Description: "考试唯一编号",
 				Type:        graphql.NewNonNull(graphql.String),
 			},
 			"code": &graphql.ArgumentConfig{
@@ -386,7 +386,7 @@ func ExamRecordCreate() *graphql.Field {
 			result.Key = Key
 
 			if Key == "" {
-				panic("考试编号 不允许为空")
+				panic("考试唯一编号 不允许为空")
 			}
 
 			db.Create(&result)
@@ -406,7 +406,7 @@ func ExamRecordUpdate() *graphql.Field {
 				Type:        graphql.NewNonNull(graphql.Int),
 			},
 			"key": &graphql.ArgumentConfig{
-				Description: "考试唯一编码",
+				Description: "考试唯一编号",
 				Type:        graphql.NewNonNull(graphql.String),
 			},
 			"code": &graphql.ArgumentConfig{
@@ -478,7 +478,7 @@ func ExamRecordUpdate() *graphql.Field {
 			result.Key = Key
 
 			if Key == "" {
-				panic("考试编号 不允许为空")
+				panic("考试唯一编号 不允许为空")
 			}
 
 			db.Save(&result)
