@@ -116,13 +116,49 @@ func Import(context echo.Context) error {
 			if v2 == "" {
 				return context.JSON(http.StatusInternalServerError,
 					map[string]interface{}{
-						"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2) + "格内容禁止为空",
+						"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2+1) + "格内容禁止为空",
 					},
 				)
 			}
+
+			if k2 == 1 {
+				//设置时区
+				loc, _ := time.LoadLocation("Asia/Shanghai")
+				//2006-01-02 15:04:05是转换的格式如php的"Y-m-d H:i:s"
+				tt, err := time.ParseInLocation("2006-01-02 15:04:05", v[k2], loc)
+				if err != nil {
+					return context.JSON(http.StatusInternalServerError,
+						map[string]interface{}{
+							"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2+1) + "格内容:" + v[k2] + "错误：" + err.Error(),
+						},
+					)
+				}
+
+				v[1] = strconv.FormatInt(tt.Unix(), 10)
+				_, err = strconv.Atoi(v[k2])
+				if err != nil {
+					return context.JSON(http.StatusInternalServerError,
+						map[string]interface{}{
+							"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2+1) + "格内容:" + v[k2] + "错误：" + err.Error(),
+						},
+					)
+				}
+			}
+
+			if k2 == 2 {
+				_, err := strconv.Atoi(v[2])
+				if err != nil {
+					return context.JSON(http.StatusInternalServerError,
+						map[string]interface{}{
+							"message": "第" + strconv.Itoa(k) + "行数据,第" + strconv.Itoa(k2+1) + "格内容:" + v[k2] + "错误：" + err.Error(),
+						},
+					)
+				}
+			}
+
 		}
 
-		//'考试编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
+		//'考试唯一编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
 
 		if _, ok := mapStudent[v[6]]; !ok {
 			batchStudent = append(batchStudent, model.Student{
@@ -186,12 +222,12 @@ func Import(context echo.Context) error {
 		if k == 0 {
 			continue
 		}
-		//'考试编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
-		Achievement, err := strconv.Atoi(v[2])
+		//'考试唯一编号', '考试时间', '成绩', '考试批次','课程','学生姓名'
+		ExamTime, err := strconv.Atoi(v[1])
 		if err != nil {
 			return err
 		}
-		ExamTime, err := strconv.Atoi(v[1])
+		Achievement, err := strconv.Atoi(v[2])
 		if err != nil {
 			return err
 		}
