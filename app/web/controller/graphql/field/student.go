@@ -253,10 +253,15 @@ func StudentCreate() *graphql.Field {
 			db := mysql.GetIns().Model(&result)
 			Name, _ := p.Args["name"].(string)
 			result.Name = Name
+			if Name == "" {
+				panic("姓名 不允许为空")
+			}
 			Key, _ := p.Args["key"].(string)
 			result.Key = Key
+			if Key == "" {
+				panic("学号 不允许为空")
+			}
 			db.Create(&result)
-			fmt.Println(result)
 			return result, nil
 		},
 	}
@@ -293,11 +298,15 @@ func StudentUpdate() *graphql.Field {
 
 			Name, _ := p.Args["name"].(string)
 			result.Name = Name
+			if Name == "" {
+				panic("姓名 不允许为空")
+			}
 			Key, _ := p.Args["key"].(string)
 			result.Key = Key
+			if Key == "" {
+				panic("学号 不允许为空")
+			}
 			db.Save(&result)
-			fmt.Println(result)
-			fmt.Println(p.Args)
 			return result, nil
 		},
 	}
@@ -324,7 +333,6 @@ func StudentDelete() *graphql.Field {
 				panic(Error)
 			}
 			db.Delete(&result)
-			fmt.Println(result)
 			return result, nil
 		},
 	}
