@@ -7,8 +7,8 @@ import (
 
 type Student struct {
 	Base
-	Name string
-	Key  string
+	Name string `gorm:"index;comment:姓名"`
+	Key  string `gorm:"index;comment:学号"`
 }
 
 func (receiver *Student) BeforeSave(db *gorm.DB) (err error) {

@@ -6,7 +6,7 @@ import (
 
 type Course struct {
 	Base
-	Name string
+	Name string `gorm:"index;comment:课程"`
 }
 
 func (receiver Course) CheckID(id int) bool {

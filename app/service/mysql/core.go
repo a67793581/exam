@@ -32,13 +32,14 @@ func NewConnection() *gorm.DB {
 			Colorful:      false,       // 禁用彩色打印
 		},
 	)
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true",
-		config.MysqlUser,
-		config.MysqlPassword,
-		config.MysqlHost,
-		config.MysqlPort,
-		config.MysqlDB,
-		config.MysqlCharset,
+		config.InsMysql().User,
+		config.InsMysql().Password,
+		config.InsMysql().Host,
+		config.InsMysql().Port,
+		config.InsMysql().DB,
+		config.InsMysql().Charset,
 	)
 
 	conn, err := gorm.Open(mysql.Open(dsn), &gorm.Config{

@@ -12,6 +12,7 @@ require (
 	github.com/go-delve/delve v1.5.1 // indirect
 	github.com/graphql-go/graphql v0.7.9
 	github.com/graphql-go/handler v0.2.3
+	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/lib/pq v1.9.0 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
