@@ -16,5 +16,5 @@ func SetupRouter() {
 	api(e)
 	//日志
 	e.Debug = true
-	e.Logger.Fatal(e.Start(":8088"))
+	e.Logger.Fatal(e.Start(":80"))
 }
